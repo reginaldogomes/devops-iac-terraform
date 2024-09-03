@@ -1,9 +1,18 @@
-resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "bhsolutions-bucket-iac-${terraform.workspace}"
-
-  tags = {
-    Name = "Bucket BH Solutions"
+module "s3" {
+  source         = "./modules/s3"
+  s3_bucket_name = "bh-solutions-iac"
+  s3_tags = {
     Iac = true
-    Context = "${terraform.workspace}"
   }
+}
+
+module "cloudfront" {
+  source             = "./modules/cloudfront"
+  origin_id          = module.s3.bucket_id
+  bucket_domain_name = module.s3.bucket_domain_name
+  cdn_tags = {
+    Iac = true
+  }
+
+  depends_on = [module.s3]
 }
